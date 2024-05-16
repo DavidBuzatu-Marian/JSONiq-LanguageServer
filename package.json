@@ -3,7 +3,7 @@
   "description": "JSONiq syntax highlighting for Visual Studio Code through language server adaptation",
   "version": "1.0.0",
   "author": "JSONiq Development Team",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "type": "module",
   "engines": {
     "node": "*"

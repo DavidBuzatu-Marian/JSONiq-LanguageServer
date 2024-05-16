@@ -21,6 +21,10 @@ To use the JSONiq Language Server, you need to have Node.js and npm installed on
 
 Once the language server is running, you can use it with the `jsoniq` VS Code extension or the Jupyter Notebook LSP. Simply open a JSONiq file in your preferred development environment, and the language server will provide the necessary language support features.
 
+## NPM Package Link
+
+The NPM package can be found at the official [npm page](https://www.npmjs.com/package/jsoniq-language-server).
+
 ## Contributing
 
 Contributions are welcome! If you find any issues or have suggestions for improvements, please open an issue or submit a pull request on the GitHub repository.

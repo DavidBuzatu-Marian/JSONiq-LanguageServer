@@ -1,1 +1,0 @@
-{"version":3,"file":"tokenizer.js","sourceRoot":"","sources":["../../../src/methods/textDocument/tokenizer.ts"],"names":[],"mappings":";;;AAAA,uCAAuC;AACvC,2DAAwD;AAIxD,SAAgB,QAAQ,CAAC,OAAe;IACtC,MAAM,WAAW,GAAG,sBAAW,CAAC,UAAU,CAAC,OAAO,CAAC,CAAC;IACpD,OAAO,IAAI,yBAAW,CAAC,WAAW,CAAC,CAAC;AACtC,CAAC;AAHD,4BAGC"}

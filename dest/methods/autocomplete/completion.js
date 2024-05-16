@@ -12,9 +12,9 @@ export const completion = (message) => {
     const inputStream = CharStream.fromString(content);
     const lexer = new jsoniqLexer(inputStream);
     const parser = new jsoniqParser(new CommonTokenStream(lexer));
-    const parseTree = parser.moduleAndThisIsIt();
     // Override error listener as we only want completion behavior.
     parser.removeErrorListeners();
+    const parseTree = parser.moduleAndThisIsIt();
     // Get index
     const index = computeTokenIndex(parseTree, params.position) ?? 0;
     const core = new CodeCompletionCore(parser);

@@ -1,7 +1,7 @@
 {
   "name": "jsoniq-language-server",
   "description": "JSONiq syntax highlighting for Visual Studio Code through language server adaptation",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "JSONiq Development Team",
   "license": "Apache-2.0",
   "type": "module",
@@ -11,7 +11,9 @@
   "scripts": {
     "antlr4ts": "antlr4ts -visitor ./src/grammar/jsoniq.g4",
     "antlr4ng": "antlr4ng -Dlanguage=TypeScript ./src/grammar/antlr4ng/jsoniq.g4",
-    "test": "jest"
+    "test": "jest",
+    "prepublishOnly": "npm run compile",
+    "compile": "tsc -b"
   },
   "repository": {
     "type": "git",
@@ -31,5 +33,12 @@
     "jest": "^29.7.0",
     "ts-jest": "^29.1.2",
     "typescript": "^5.4.5"
-  }
+  },
+  "keywords": [
+    "jsoniq",
+    "language-server"
+  ],
+  "files": [
+    "/dest"
+  ]
 }

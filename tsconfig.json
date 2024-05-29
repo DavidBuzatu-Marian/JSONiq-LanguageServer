@@ -1,4 +1,5 @@
 {
+  "extends": "./tsconfig.paths.json",
   "compilerOptions": {
     "target": "es2020",
     "lib": ["es2020"],
@@ -12,9 +13,9 @@
     "esModuleInterop": true
   },
   "ts-node": {
-    // Tell ts-node CLI to install the --loader automatically
-    "esm": true
+    "esm": true,
+    "require": ["tsconfig-paths/register"]
   },
-  "include": ["src"],
+  "include": ["src", "tsconfig.paths.json"],
   "exclude": ["node_modules", ".vscode-test"]
 }

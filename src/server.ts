@@ -1,6 +1,6 @@
+import { Connection, createConnection } from "vscode-languageserver/node.js";
 import log from "./log.js";
 import { completion } from "./methods/autocomplete/completion.js";
-import { diagnostic } from "./methods/diagnostics/diagnostic.js";
 import { exit } from "./methods/exit.js";
 import { initialize } from "./methods/initialize.js";
 import {
@@ -24,13 +24,14 @@ export interface RequestMessage extends NotificationMessage {
   id: number | string;
 }
 
+export const connection: Connection = createConnection();
+
 type RequestMethod = (
   message: RequestMessage
 ) =>
   | ReturnType<typeof initialize>
   | ReturnType<typeof semanticTokens>
-  | ReturnType<typeof completion>
-  | ReturnType<typeof diagnostic>;
+  | ReturnType<typeof completion>;
 
 type NotificationMethod = (message: NotificationMessage) => void;
 
@@ -40,7 +41,6 @@ const methodLookup: Record<string, RequestMethod | NotificationMethod> = {
   "textDocument/semanticTokens/full": semanticTokens,
   "textDocument/semanticTokens/range": rangeSemanticTokens,
   "textDocument/completion": completion,
-  "textDocument/diagnostic": diagnostic,
   "textDocument/didOpen": didOpen,
   shutdown,
   exit,

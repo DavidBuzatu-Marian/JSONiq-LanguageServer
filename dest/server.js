@@ -1,19 +1,19 @@
+import { createConnection } from "vscode-languageserver/node.js";
 import log from "./log.js";
 import { completion } from "./methods/autocomplete/completion.js";
-import { diagnostic } from "./methods/diagnostics/diagnostic.js";
 import { exit } from "./methods/exit.js";
 import { initialize } from "./methods/initialize.js";
 import { rangeSemanticTokens, semanticTokens, } from "./methods/semanticHighlighting/semanticTokens.js";
 import { shutdown } from "./methods/shutdown.js";
 import { didChange } from "./methods/textDocument/didChange.js";
 import { didOpen } from "./methods/textDocument/didOpen.js";
+export const connection = createConnection();
 const methodLookup = {
     initialize,
     "textDocument/didChange": didChange,
     "textDocument/semanticTokens/full": semanticTokens,
     "textDocument/semanticTokens/range": rangeSemanticTokens,
     "textDocument/completion": completion,
-    "textDocument/diagnostic": diagnostic,
     "textDocument/didOpen": didOpen,
     shutdown,
     exit,

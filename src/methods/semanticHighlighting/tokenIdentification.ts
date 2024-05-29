@@ -388,7 +388,6 @@ export class TokensParser {
     }
     let resultTokenType = tokenTypes["unknown"];
     let resultTokenModifier = 0;
-    log.write(`Token: ${token}`);
     if (keywordSet.has(token)) {
       resultTokenType = tokenTypes["keyword"];
       resultTokenModifier = tokenModifiers["declaration"];

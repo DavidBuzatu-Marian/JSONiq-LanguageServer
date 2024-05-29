@@ -1,10 +1,7 @@
 import { cwd } from "process";
 import { beforeEach, afterEach, describe, expect, test } from "@jest/globals";
 
-import type {
-  CompletionList,
-  FullDocumentDiagnosticReport,
-} from "vscode-languageserver";
+import type { CompletionList, Diagnostic } from "vscode-languageserver";
 
 import { LanguageServerWrapper } from "./languageServerWrapper";
 
@@ -58,7 +55,7 @@ describe("jsoniq-language-server", () => {
   beforeEach(() => {
     languageServer = new LanguageServerWrapper(
       "npx",
-      ["tsx", `${cwd()}/src/server.ts`],
+      ["tsx", `${cwd()}/src/server.ts`, `--stdio`],
       !!process.env.VERBOSE
     );
 
@@ -131,11 +128,11 @@ describe("jsoniq-language-server", () => {
 
     const response = await languageServer.request("shutdown", {});
     expect(response).toBeNull();
-    await wait(2000);
+    await wait(1000);
     expect(languageServer.process?.exitCode).toBeNull();
 
     languageServer.notify("exit", {});
-    await wait(2000);
+    await wait(1000);
     expect(languageServer.process?.exitCode).toBe(0);
   });
 
@@ -150,25 +147,21 @@ describe("jsoniq-language-server", () => {
 
     const expectedDiagnostics = `mismatched input ',' expecting {';', '=', '(', '*', 'eq', 'ne', 'lt', 'le', 'gt', 'ge', '!=', '<', '<=', '>', '>=', '||', '+', '-', 'div', 'idiv', 'mod', '!', '[', '.', 'or', 'and', 'to', 'instance', 'is', 'treat', 'cast', 'castable'}`;
 
-    const diagnostics = (await languageServer.request(
-      "textDocument/diagnostic",
-      { textDocument: { uri: defaultFile } }
-    )) as FullDocumentDiagnosticReport;
+    const diagnostics = (await languageServer.validateContent(
+      defaultFile
+    )) as Diagnostic[];
 
-    expect(diagnostics).toStrictEqual({
-      kind: "full",
-      items: [
-        {
-          severity: 1,
-          message: expectedDiagnostics,
-          range: {
-            start: { line: 5, character: 23 },
-            end: { line: 5, character: 24 },
-          },
-          source: "JSONiq language server",
+    expect(diagnostics).toStrictEqual([
+      {
+        severity: 1,
+        message: expectedDiagnostics,
+        range: {
+          start: { line: 5, character: 23 },
+          end: { line: 5, character: 24 },
         },
-      ],
-    });
+        source: "JSONiq language server",
+      },
+    ]);
   });
 
   test("can initialize and give semantic tokens", async () => {

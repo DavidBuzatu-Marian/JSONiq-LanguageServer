@@ -1,11 +1,11 @@
-import { RequestMessage } from "../../server.js";
-import { Range } from "../../types.js";
-import log from "../../log.js";
-import { TextDocumentIdentifier, documents } from "../../documents.js";
+import { RequestMessage, connection } from "@src/server.js";
+import { Range } from "@src/types.js";
+import { TextDocumentIdentifier, documents } from "@src/documents.js";
 import { CharStreams, CommonTokenStream } from "antlr4ts";
-import { jsoniqLexer } from "../../grammar/jsoniqLexer.js";
-import { jsoniqParser } from "../../grammar/jsoniqParser.js";
+import { jsoniqLexer } from "@src/grammar/jsoniqLexer.js";
+import { jsoniqParser } from "@src/grammar/jsoniqParser.js";
 import { DiagnosticErrorListener } from "./errorListener.js";
+import { DocumentUri } from "vscode-languageserver";
 
 interface DocumentDiagnosticParams {
   textDocument: TextDocumentIdentifier;
@@ -34,17 +34,54 @@ interface FullDocumentDiagnosticReport {
   items: Diagnostic[];
 }
 
-export const diagnostic = (
-  message: RequestMessage
-): FullDocumentDiagnosticReport | null => {
-  const params = message.params as DocumentDiagnosticParams;
-  const content = documents.get(params.textDocument.uri);
+const pendingDocumentDiagnostics = new Map<DocumentUri, NodeJS.Timeout>();
+
+const DEFAULT_DELAY = 200; // 200ms delay before running diagnostics
+export const documentsDiagnostics = new Map<
+  DocumentUri,
+  FullDocumentDiagnosticReport
+>();
+
+// @DEPRECATED
+// Diagnostics are supported via push mechanism whenever clients support push diagnostics.
+// export const diagnostic = (
+//   message: RequestMessage
+// ): FullDocumentDiagnosticReport | null => {
+//   const params = message.params as DocumentDiagnosticParams;
+//   const content = documents.get(params.textDocument.uri);
+//   if (!content) {
+//     return null;
+//   }
+//   const diagnostic = validateContent(content);
+//   documentsDiagnostics.set(content, diagnostic);
+//   return diagnostic;
+// };
+
+export const diagnoseDocument = (textDocumentUri: DocumentUri) => {
+  const content = documents.get(textDocumentUri);
   if (!content) {
     return null;
   }
-  const items: Diagnostic[] = [];
+  clearPendingDiagnostic(textDocumentUri);
+  pendingDocumentDiagnostics.set(
+    textDocumentUri,
+    setTimeout(() => {
+      // Remove self after delay expires
+      pendingDocumentDiagnostics.delete(textDocumentUri);
+      const diagnostic = validateContent(content);
+      documentsDiagnostics.set(content, diagnostic);
+      connection.sendDiagnostics({
+        uri: textDocumentUri,
+        diagnostics: diagnostic.items,
+      });
+    }, DEFAULT_DELAY)
+  );
+};
 
-  // Parse file
+export const validateContent = (
+  content: string
+): FullDocumentDiagnosticReport => {
+  const items: Diagnostic[] = [];
   const inputStream = CharStreams.fromString(content);
   const lexer = new jsoniqLexer(inputStream);
   const tokenStream = new CommonTokenStream(lexer);
@@ -64,4 +101,11 @@ export const diagnostic = (
     kind: "full",
     items: diagnosticErrorListener.items,
   };
+};
+export const clearPendingDiagnostic = (textDocumentUri: string) => {
+  const pendingDiagnostic = pendingDocumentDiagnostics.get(textDocumentUri);
+  if (pendingDiagnostic) {
+    clearTimeout(pendingDiagnostic);
+    pendingDocumentDiagnostics.delete(textDocumentUri);
+  }
 };

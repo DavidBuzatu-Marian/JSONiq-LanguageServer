@@ -1,8 +1,8 @@
-import { connection } from "@src/server.js";
-import { documents } from "@src/documents.js";
+import { connection } from "../../server.js";
+import { documents } from "../../documents.js";
 import { CharStreams, CommonTokenStream } from "antlr4ts";
-import { jsoniqLexer } from "@src/grammar/jsoniqLexer.js";
-import { jsoniqParser } from "@src/grammar/jsoniqParser.js";
+import { jsoniqLexer } from "../../grammar/jsoniqLexer.js";
+import { jsoniqParser } from "../../grammar/jsoniqParser.js";
 import { DiagnosticErrorListener } from "./errorListener.js";
 var DiagnosticSeverity;
 (function (DiagnosticSeverity) {

@@ -1,8 +1,7 @@
 {
-  "extends": "./tsconfig.paths.json",
   "compilerOptions": {
     "target": "es2020",
-    "lib": ["es2020"],
+    "lib": ["es2020", "es2022"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "sourceMap": true,
@@ -13,8 +12,7 @@
     "esModuleInterop": true
   },
   "ts-node": {
-    "esm": true,
-    "require": ["tsconfig-paths/register"]
+    "esm": true
   },
   "include": ["src", "tsconfig.paths.json"],
   "exclude": ["node_modules", ".vscode-test"]

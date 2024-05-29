@@ -8,10 +8,6 @@ export const initialize = (message) => {
                 range: true,
                 full: { delta: false },
             },
-            diagnosticProvider: {
-                interFileDependencies: false,
-                workspaceDiagnostics: false,
-            },
             completionProvider: {},
         },
         serverInfo: {

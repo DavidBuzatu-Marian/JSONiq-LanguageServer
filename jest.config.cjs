@@ -1,3 +1,5 @@
+const { pathsToModuleNameMapper } = require("ts-jest");
+const { compilerOptions } = require("./tsconfig.paths.json");
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
   preset: "ts-jest",
@@ -9,4 +11,7 @@ module.exports = {
     "/__tests__/languageServerWrapper.ts",
   ],
   moduleFileExtensions: ["js", "ts"],
+  moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, {
+    prefix: "<rootDir>/",
+  }),
 };

@@ -6,6 +6,7 @@ export class LanguageServerWrapper {
   public process: ChildProcess | undefined;
   private requestId: number = 0;
   public requestHandlers: Map<number, (value: object) => void> = new Map();
+  public diagnosticHandlers: Map<string, (value: object) => void> = new Map();
 
   constructor(
     public readonly command: string,
@@ -71,6 +72,11 @@ export class LanguageServerWrapper {
           }
           this.requestHandlers.get(message.id)?.(message.result);
           this.requestHandlers.delete(message.id);
+        } else if (message.method === "textDocument/publishDiagnostics") {
+          this.diagnosticHandlers.get(message.params.uri)?.(
+            message.params.diagnostics
+          );
+          this.diagnosticHandlers.delete(message.params.uri);
         } else {
           if (this.verbose) {
             console.warn(JSON.stringify(message, null, 2));
@@ -123,6 +129,19 @@ export class LanguageServerWrapper {
 
     return new Promise((resolve) => {
       this.requestHandlers.set(this.requestId, resolve);
+    });
+  }
+
+  validateContent(documentUri: string) {
+    if (!this.process || !this.process.stdin) {
+      throw new Error("Language server is not running");
+    }
+    if (this.verbose) {
+      console.log(`Waiting for diagnostic for uri: ${documentUri}`);
+    }
+
+    return new Promise((resolve) => {
+      this.diagnosticHandlers.set(documentUri, resolve);
     });
   }
 }

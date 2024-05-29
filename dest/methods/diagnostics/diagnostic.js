@@ -1,7 +1,8 @@
-import { documents } from "../../documents.js";
+import { connection } from "@src/server.js";
+import { documents } from "@src/documents.js";
 import { CharStreams, CommonTokenStream } from "antlr4ts";
-import { jsoniqLexer } from "../../grammar/jsoniqLexer.js";
-import { jsoniqParser } from "../../grammar/jsoniqParser.js";
+import { jsoniqLexer } from "@src/grammar/jsoniqLexer.js";
+import { jsoniqParser } from "@src/grammar/jsoniqParser.js";
 import { DiagnosticErrorListener } from "./errorListener.js";
 var DiagnosticSeverity;
 (function (DiagnosticSeverity) {
@@ -10,14 +11,42 @@ var DiagnosticSeverity;
     DiagnosticSeverity.Information = 3;
     DiagnosticSeverity.Hint = 4;
 })(DiagnosticSeverity || (DiagnosticSeverity = {}));
-export const diagnostic = (message) => {
-    const params = message.params;
-    const content = documents.get(params.textDocument.uri);
+const pendingDocumentDiagnostics = new Map();
+const DEFAULT_DELAY = 200; // 200ms delay before running diagnostics
+export const documentsDiagnostics = new Map();
+// @DEPRECATED
+// Diagnostics are supported via push mechanism whenever clients support push diagnostics.
+// export const diagnostic = (
+//   message: RequestMessage
+// ): FullDocumentDiagnosticReport | null => {
+//   const params = message.params as DocumentDiagnosticParams;
+//   const content = documents.get(params.textDocument.uri);
+//   if (!content) {
+//     return null;
+//   }
+//   const diagnostic = validateContent(content);
+//   documentsDiagnostics.set(content, diagnostic);
+//   return diagnostic;
+// };
+export const diagnoseDocument = (textDocumentUri) => {
+    const content = documents.get(textDocumentUri);
     if (!content) {
         return null;
     }
+    clearPendingDiagnostic(textDocumentUri);
+    pendingDocumentDiagnostics.set(textDocumentUri, setTimeout(() => {
+        // Remove self after delay expires
+        pendingDocumentDiagnostics.delete(textDocumentUri);
+        const diagnostic = validateContent(content);
+        documentsDiagnostics.set(content, diagnostic);
+        connection.sendDiagnostics({
+            uri: textDocumentUri,
+            diagnostics: diagnostic.items,
+        });
+    }, DEFAULT_DELAY));
+};
+export const validateContent = (content) => {
     const items = [];
-    // Parse file
     const inputStream = CharStreams.fromString(content);
     const lexer = new jsoniqLexer(inputStream);
     const tokenStream = new CommonTokenStream(lexer);
@@ -33,5 +62,12 @@ export const diagnostic = (message) => {
         kind: "full",
         items: diagnosticErrorListener.items,
     };
+};
+export const clearPendingDiagnostic = (textDocumentUri) => {
+    const pendingDiagnostic = pendingDocumentDiagnostics.get(textDocumentUri);
+    if (pendingDiagnostic) {
+        clearTimeout(pendingDiagnostic);
+        pendingDocumentDiagnostics.delete(textDocumentUri);
+    }
 };
 //# sourceMappingURL=diagnostic.js.map

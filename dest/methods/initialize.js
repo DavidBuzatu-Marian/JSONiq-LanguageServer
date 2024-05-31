@@ -12,7 +12,7 @@ export const initialize = (message) => {
         },
         serverInfo: {
             name: "jsoniq-language-server",
-            version: "0.0.1",
+            version: "1.1.1",
         },
     };
 };

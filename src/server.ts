@@ -7,9 +7,11 @@ import {
   rangeSemanticTokens,
   semanticTokens,
 } from "./methods/semanticHighlighting/semanticTokens.js";
-import { shutdown } from "./methods/shutdown.js";
+import { isShutDownInitialized, shutdown } from "./methods/shutdown.js";
 import { didChange } from "./methods/textDocument/didChange.js";
 import { didOpen } from "./methods/textDocument/didOpen.js";
+
+const InvalidRequest: number = -32600;
 
 interface Message {
   jsonrpc: string;
@@ -85,9 +87,21 @@ process.stdin.on("data", (chunk) => {
     // Handle the method
     const method = methodLookup[jsonMessage.method];
     if (method) {
-      const result = method(jsonMessage);
-      if (result !== undefined) {
-        respond(jsonMessage.id, result);
+      if (isShutDownInitialized && jsonMessage.method !== "exit") {
+        // We received a method call other than exit after shutdown.
+        // This must return an error.
+        const errResult = {
+          error: {
+            code: InvalidRequest,
+            message: `Attempting to call method: ${jsonMessage.method} after shutdown! This is an illegal operation. Exit-only is expected`,
+          },
+        };
+        respond(jsonMessage.id, errResult);
+      } else {
+        const result = method(jsonMessage);
+        if (result !== undefined) {
+          respond(jsonMessage.id, result);
+        }
       }
     }
 

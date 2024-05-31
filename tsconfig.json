@@ -12,8 +12,7 @@
     "esModuleInterop": true
   },
   "ts-node": {
-    "esm": true,
-    "require": ["tsconfig-paths/register"]
+    "esm": true
   },
   "include": ["src", "tsconfig.paths.json"],
   "exclude": ["node_modules", ".vscode-test"]

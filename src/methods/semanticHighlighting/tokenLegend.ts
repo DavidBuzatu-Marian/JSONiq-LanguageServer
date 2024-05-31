@@ -1,5 +1,3 @@
-import assert from "assert";
-import log from "../../log.js";
 import { Position } from "../../types.js";
 
 interface SemanticTokensLegend {
@@ -20,77 +18,32 @@ export interface SemanticToken {
 }
 
 export const tokenTypes = {
-  type: 0,
-  namespace: 1,
-  keyword: 2,
-  variable: 3,
-  parameter: 4,
-  property: 5,
-  function: 6,
-  comment: 7,
-  string: 8,
-  number: 9,
-  operator: 10,
-  decorator: 11,
-  label: 12,
-  local_storage: 13,
-  unknown: 14,
-  punctuation: 15,
+  type: 0, // used for types within JSONiq
+  namespace: 1, // used for namespaces
+  keyword: 2, // used for keywords: for, let, break loop, etc.
+  variable: 3, // used for variables
+  parameter: 4, // future use for function parameters
+  property: 5, // used for object properties
+  function: 6, // used for function definition
+  comment: 7, // used for comments
+  string: 8, // used for string literals
+  number: 9, // used for number literals
+  operator: 10, // used for operators
+  decorator: 11, // used for annotations
+  local_storage: 12, // custom type used for local variables
+  unknown: 13, // used when no other type can be inferred
+  punctuation: 14, // used for brackets, comma and dot.
 };
 
 export const tokenModifiers = {
-  declaration: 1 << 0,
-  static: 1 << 1,
-  definition: 1 << 2,
-  modification: 1 << 3,
-  functionScope: 1 << 4,
-  block: 1 << 5,
-  documentation: 1 << 6,
-  readonly: 1 << 7,
-  defaultLibrary: 1 << 8,
+  declaration: 1 << 0, // used for declarations
+  static: 1 << 1, // used for static constructs
+  definition: 1 << 2, // used for definitions
+  readonly: 1 << 3, // used for read-only variables and functions
+  defaultLibrary: 1 << 4, // used for built-in library calls
 };
 
 export const tokenLegend: SemanticTokensLegend = {
   tokenTypes: Object.keys(tokenTypes),
   tokenModifiers: Object.keys(tokenModifiers),
-};
-
-export const encodeSemanticTokens = (
-  tokens: SemanticToken[],
-  offset: Position
-): number[] => {
-  const result: number[] = [];
-  const startLine = offset.line;
-  let previousPosition = { line: 0, character: 0 };
-
-  for (const token of tokens) {
-    let tokenPosition = {
-      line: token.startIdx.line + offset.line,
-      character: token.startIdx.character,
-    };
-    // Add offset character to first line tokens.
-    if (token.startIdx.line === startLine) {
-      tokenPosition.character += offset.character;
-    }
-    let deltaLine = tokenPosition.line - previousPosition.line;
-    // Delta index is relative to previous token in the same line.
-    let deltaDiff =
-      previousPosition.line === tokenPosition.line
-        ? previousPosition.character
-        : 0;
-    let deltaIndex = tokenPosition.character - deltaDiff;
-
-    assert(deltaLine >= 0, "Delta line must be positive");
-    assert(deltaIndex >= 0, "Delta index must be positive");
-
-    // Now previous becomes current token's start.
-    previousPosition = tokenPosition;
-
-    result.push(deltaLine);
-    result.push(deltaIndex);
-    result.push(token.tokenLength);
-    result.push(token.tokenType.typeNumber);
-    result.push(token.tokenModifiers.typeNumber);
-  }
-  return result;
 };

@@ -1,9 +1,9 @@
-import { RequestMessage, connection } from "@src/server.js";
-import { Range } from "@src/types.js";
-import { TextDocumentIdentifier, documents } from "@src/documents.js";
+import { RequestMessage, connection } from "../../server.js";
+import { Range } from "../../types.js";
+import { TextDocumentIdentifier, documents } from "../../documents.js";
 import { CharStreams, CommonTokenStream } from "antlr4ts";
-import { jsoniqLexer } from "@src/grammar/jsoniqLexer.js";
-import { jsoniqParser } from "@src/grammar/jsoniqParser.js";
+import { jsoniqLexer } from "../../grammar/jsoniqLexer.js";
+import { jsoniqParser } from "../../grammar/jsoniqParser.js";
 import { DiagnosticErrorListener } from "./errorListener.js";
 import { DocumentUri } from "vscode-languageserver";
 

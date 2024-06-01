@@ -3,17 +3,16 @@ on:
   release:
     types: [published]
 jobs:
-  publish:
+  npm-publish:
     runs-on: ubuntu-latest
     environment: NPM_Release
     steps:
       - uses: actions/checkout@v4
-      # Setup .npmrc file to publish to npm
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v3
         with:
           node-version: "22"
-          registry-url: "https://registry.npmjs.org"
       - run: npm ci
-      - run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: npm test
+      - uses: JS-DevTools/npm-publish@v3
+        with:
+          token: ${{ secrets.NPM_TOKEN }}

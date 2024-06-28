@@ -1,9 +1,9 @@
-import { TextDocumentIdentifier, documents } from "../../documents.js";
+import { TextDocumentIdentifier, documents } from "../../types/documents.js";
 import { RequestMessage } from "../../server.js";
 import { TokensParser } from "./tokenIdentification.js";
 import { CharStreams } from "antlr4ts";
 import { jsoniqLexer } from "../../grammar/jsoniqLexer.js";
-import { Position, Range } from "../../types.js";
+import { Position, Range } from "../../types/types.js";
 import assert from "assert";
 import { SemanticToken } from "./tokenLegend.js";
 

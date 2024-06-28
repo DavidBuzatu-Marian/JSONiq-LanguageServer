@@ -1,7 +1,7 @@
-import { RequestMessage } from "./types.js";
-import { MethodHandler } from "./methods/method-handler.js";
-import { LengthNotFoundInContentLengthHeaderError } from "./errors/length-error.js";
-import log from "./log.js";
+import { RequestMessage } from "../types/types.js";
+import { MethodHandler } from "../methods/method-handler.js";
+import { LengthNotFoundInContentLengthHeaderError } from "../errors/length-error.js";
+import log from "../log/log.js";
 
 const SPACING_OFFSET: number = 4;
 

@@ -1,4 +1,4 @@
-import { TextDocumentIdentifier } from "../../documents.js";
+import { TextDocumentIdentifier } from "../../types/documents.js";
 import { NotificationMessage } from "../../server.js";
 import {
   clearPendingDiagnostic,

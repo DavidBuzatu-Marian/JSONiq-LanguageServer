@@ -1,5 +1,5 @@
-import log from "../log.js";
-import { NotificationMessage, RequestMessage } from "../types.js";
+import log from "../log/log.js";
+import { NotificationMessage, RequestMessage } from "../types/types.js";
 import { completion } from "./autocomplete/completion.js";
 import {
   semanticTokens,
@@ -11,7 +11,7 @@ import { shutdown } from "./serverMethods/shutdown.js";
 import { didChange } from "./textDocument/didChange.js";
 import { didOpen } from "./textDocument/didOpen.js";
 
-const INVALID_REQUEST: number = -32600;
+export const INVALID_REQUEST: number = -32600;
 
 type RequestMethod = (
   message: RequestMessage
@@ -46,22 +46,32 @@ export class MethodHandler {
     this.logRequest(jsonMessage);
     const method = this.methodLookup[jsonMessage.method];
     if (method) {
-      if (this.isShutDownInitialized && jsonMessage.method !== "exit") {
-        // We received a method call other than exit after shutdown.
-        // This must return an error.
-        const errResult = {
-          error: {
-            code: INVALID_REQUEST,
-            message: `Attempting to call method: ${jsonMessage.method} after shutdown! This is an illegal operation. Exit-only is expected`,
-          },
-        };
-        this.respond(jsonMessage.id, errResult);
-      } else {
-        const result = method(jsonMessage);
-        if (result !== undefined) {
-          this.respond(jsonMessage.id, result);
-        }
+      this.handleMethodWithExit(method, jsonMessage);
+    }
+  }
+
+  private handleMethodWithExit(
+    method: RequestMethod | NotificationMethod,
+    jsonMessage: RequestMessage
+  ) {
+    if (this.isShutDownInitialized && jsonMessage.method !== "exit") {
+      // We received a method call other than exit after shutdown.
+      // This must return an error.
+      const errResult = {
+        error: {
+          code: INVALID_REQUEST,
+          message: `Attempting to call method: ${jsonMessage.method} after shutdown! This is an illegal operation. Exit-only is expected`,
+        },
+      };
+      this.respond(jsonMessage.id, errResult);
+    } else {
+      const result = method(jsonMessage);
+      if (result !== undefined) {
+        this.respond(jsonMessage.id, result);
       }
+    }
+    if (jsonMessage.method === "shutdown") {
+      this.isShutDownInitialized = true;
     }
   }
 

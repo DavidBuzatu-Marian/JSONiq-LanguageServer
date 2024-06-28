@@ -5,13 +5,13 @@ import {
   Parser,
   TerminalNode,
 } from "antlr4ng";
-import { TextDocumentIdentifier, documents } from "../../documents.js";
+import { TextDocumentIdentifier, documents } from "../../types/documents.js";
 import { jsoniqLexer } from "../../grammar/antlr4ng/jsoniqLexer.js";
 import { RequestMessage } from "../../server.js";
-import { Position } from "../../types.js";
+import { Position } from "../../types/types.js";
 import { jsoniqParser } from "../../grammar/antlr4ng/jsoniqParser.js";
 import { CodeCompletionCore } from "antlr4-c3";
-import log from "../../log.js";
+import log from "../../log/log.js";
 
 export interface CompletionItem {
   label: string;

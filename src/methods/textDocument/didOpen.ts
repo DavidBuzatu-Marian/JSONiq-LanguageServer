@@ -1,4 +1,4 @@
-import { DocumentUri, documents } from "../../documents.js";
+import { DocumentUri, documents } from "../../types/documents.js";
 import { NotificationMessage } from "../../server.js";
 import { diagnoseDocument } from "../diagnostics/diagnostic.js";
 

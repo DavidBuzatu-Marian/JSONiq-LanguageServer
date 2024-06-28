@@ -1,6 +1,6 @@
 import { RequestMessage, connection } from "../../server.js";
-import { Range } from "../../types.js";
-import { TextDocumentIdentifier, documents } from "../../documents.js";
+import { Range } from "../../types/types.js";
+import { TextDocumentIdentifier, documents } from "../../types/documents.js";
 import { CharStreams, CommonTokenStream } from "antlr4ts";
 import { jsoniqLexer } from "../../grammar/jsoniqLexer.js";
 import { jsoniqParser } from "../../grammar/jsoniqParser.js";

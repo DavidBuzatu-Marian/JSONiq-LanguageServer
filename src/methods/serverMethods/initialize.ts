@@ -1,4 +1,4 @@
-import { RequestMessage } from "../../types.js";
+import { RequestMessage } from "../../types/types.js";
 import { tokenLegend } from "../semanticHighlighting/tokenLegend.js";
 type ServerCapabilities = Record<string, unknown>;
 

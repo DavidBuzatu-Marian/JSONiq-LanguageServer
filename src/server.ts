@@ -1,5 +1,5 @@
 import { Connection, createConnection } from "vscode-languageserver/node.js";
-import { BufferHandler } from "./buffer-handler.js";
+import { BufferHandler } from "./buffer/buffer-handler.js";
 
 export const connection: Connection = createConnection();
 

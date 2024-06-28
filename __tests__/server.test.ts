@@ -5,7 +5,12 @@ import type { CompletionList, Diagnostic } from "vscode-languageserver";
 
 import { LanguageServerWrapper } from "./languageServerWrapper";
 
+const INVALID_REQUEST: number = -32600;
 let languageServer: LanguageServerWrapper;
+type ErrorResponse = {
+  code: number;
+  message: string;
+};
 
 const defaultFile = `file://${cwd()}/resources/example.jq`;
 
@@ -124,15 +129,22 @@ describe("jsoniq-language-server", () => {
   });
 
   test("can shutdown and exit", async () => {
+    let exitResolve: any;
+    const exitPromise = new Promise((resolve) => {
+      exitResolve = resolve;
+    });
+
     await init();
 
     const response = await languageServer.request("shutdown", {});
     expect(response).toBeNull();
-    await wait(1000);
     expect(languageServer.process?.exitCode).toBeNull();
 
     languageServer.notify("exit", {});
-    await wait(1000);
+    languageServer.process?.on("exit", () => {
+      exitResolve?.();
+    });
+    await exitPromise;
     expect(languageServer.process?.exitCode).toBe(0);
   });
 
@@ -254,5 +266,20 @@ describe("jsoniq-language-server", () => {
       { textDocument: { uri: defaultFile } }
     );
     expect(semanticTokens).toStrictEqual(expectedData);
+  });
+
+  test("shutdown with open file notification returns error", async () => {
+    await init();
+    const response = await languageServer.request("shutdown", {});
+    expect(response).toBeNull();
+    expect(languageServer.process?.exitCode).toBeNull();
+    didOpen(`for $store in $stores
+      for $state in $states
+      where $state.code eq $store.state
+      group by $code := $state.code
+      order by $code
+      return $res := $res, { "code" : $code, "stores" : count($store) };`);
+    const error = (await languageServer.getError()) as ErrorResponse;
+    expect(error?.code).toBe(INVALID_REQUEST);
   });
 });

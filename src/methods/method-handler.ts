@@ -23,6 +23,7 @@ type RequestMethod = (
 type NotificationMethod = (message: NotificationMessage) => void;
 export class MethodHandler {
   private isShutDownInitialized = false;
+  private invokedMethod: RequestMethod | NotificationMethod | undefined;
   private methodLookup: Record<string, RequestMethod | NotificationMethod> = {
     initialize,
     "textDocument/didChange": didChange,
@@ -42,36 +43,31 @@ export class MethodHandler {
     });
   }
 
-  public handleIncomingMethod(jsonMessage: RequestMessage) {
-    this.logRequest(jsonMessage);
-    const method = this.methodLookup[jsonMessage.method];
-    if (method) {
-      this.handleMethodWithExit(method, jsonMessage);
+  private getMethodResultAndRespond(jsonMessage: RequestMessage) {
+    const result = this.getMethodResult(jsonMessage);
+    if (result !== undefined) {
+      this.respond(jsonMessage.id, result);
     }
   }
 
-  private handleMethodWithExit(
-    method: RequestMethod | NotificationMethod,
-    jsonMessage: RequestMessage
-  ) {
+  private setShutDownInvoked(jsonMessage: RequestMessage) {
+    if (jsonMessage.method === "shutdown") {
+      this.isShutDownInitialized = true;
+    }
+  }
+
+  private getMethodResult(jsonMessage: RequestMessage) {
     if (this.isShutDownInitialized && jsonMessage.method !== "exit") {
       // We received a method call other than exit after shutdown.
       // This must return an error.
-      const errResult = {
+      return {
         error: {
           code: INVALID_REQUEST,
-          message: `Attempting to call method: ${jsonMessage.method} after shutdown! This is an illegal operation. Exit-only is expected`,
+          message: `Attempting to call method: ${jsonMessage.method} after shutdown! This is an illegal operation. Exit-only is allowed`,
         },
       };
-      this.respond(jsonMessage.id, errResult);
     } else {
-      const result = method(jsonMessage);
-      if (result !== undefined) {
-        this.respond(jsonMessage.id, result);
-      }
-    }
-    if (jsonMessage.method === "shutdown") {
-      this.isShutDownInitialized = true;
+      return this.invokedMethod!(jsonMessage);
     }
   }
 
@@ -82,5 +78,12 @@ export class MethodHandler {
 
     log.write(header + message);
     process.stdout.write(header + message);
+  }
+
+  public handleIncomingMethod(jsonMessage: RequestMessage) {
+    this.logRequest(jsonMessage);
+    this.invokedMethod = this.methodLookup[jsonMessage.method];
+    this.getMethodResultAndRespond(jsonMessage);
+    this.setShutDownInvoked(jsonMessage);
   }
 }

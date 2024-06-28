@@ -1,4 +1,4 @@
-import { documents } from "../../documents.js";
+import { documents } from "../../types/documents.js";
 import { TokensParser } from "./tokenIdentification.js";
 import { CharStreams } from "antlr4ts";
 import { jsoniqLexer } from "../../grammar/jsoniqLexer.js";
@@ -23,14 +23,7 @@ export const semanticTokens = (message) => {
     }
     return getSemanticTokensFromContent(content);
 };
-export const rangeSemanticTokens = (message) => {
-    const params = message.params;
-    const content = documents.get(params.textDocument.uri);
-    if (!content) {
-        return {
-            data: [],
-        };
-    }
+const getContentFromRange = (content, params) => {
     const contentLines = content.split(/\r?\n/);
     const startPosition = params.range.start;
     const endPosition = params.range.end;
@@ -41,6 +34,18 @@ export const rangeSemanticTokens = (message) => {
         ++lineCnt;
     }
     contentForTokens += contentLines[lineCnt].slice(0, endPosition.character);
+    return contentForTokens;
+};
+export const rangeSemanticTokens = (message) => {
+    const params = message.params;
+    const startPosition = params.range.start;
+    const content = documents.get(params.textDocument.uri);
+    if (!content) {
+        return {
+            data: [],
+        };
+    }
+    const contentForTokens = getContentFromRange(content, params);
     return getSemanticTokensFromContent(contentForTokens, startPosition);
 };
 const encodeSemanticTokens = (tokens, offset) => {

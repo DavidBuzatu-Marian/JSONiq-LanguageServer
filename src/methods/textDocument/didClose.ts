@@ -1,5 +1,5 @@
 import { TextDocumentIdentifier } from "../../types/documents.js";
-import { NotificationMessage } from "../../server.js";
+import { NotificationMessage } from "../../types/types.js";
 import {
   clearPendingDiagnostic,
   documentsDiagnostics,

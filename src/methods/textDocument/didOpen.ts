@@ -1,5 +1,5 @@
-import { DocumentUri, documents } from "../../documents.js";
-import { NotificationMessage } from "../../server.js";
+import { DocumentUri, documents } from "../../types/documents.js";
+import { NotificationMessage } from "../../types/types.js";
 import { diagnoseDocument } from "../diagnostics/diagnostic.js";
 
 type TextDocumentItem = {

@@ -1,11 +1,10 @@
-import { RequestMessage, connection } from "../../server.js";
-import { Range } from "../../types.js";
-import { TextDocumentIdentifier, documents } from "../../documents.js";
-import { CharStreams, CommonTokenStream } from "antlr4ts";
-import { jsoniqLexer } from "../../grammar/jsoniqLexer.js";
-import { jsoniqParser } from "../../grammar/jsoniqParser.js";
+import { connection } from "../../server.js";
+import { Range } from "../../types/types.js";
+import { TextDocumentIdentifier, documents } from "../../types/documents.js";
 import { DiagnosticErrorListener } from "./errorListener.js";
 import { DocumentUri } from "vscode-languageserver";
+import { initializeJSONiqParserWithoutErrorListener } from "../../parser-utils/parser.js";
+import { jsoniqParser } from "../../grammar/jsoniqParser.js";
 
 interface DocumentDiagnosticParams {
   textDocument: TextDocumentIdentifier;
@@ -57,12 +56,7 @@ export const documentsDiagnostics = new Map<
 //   return diagnostic;
 // };
 
-export const diagnoseDocument = (textDocumentUri: DocumentUri) => {
-  const content = documents.get(textDocumentUri);
-  if (!content) {
-    return null;
-  }
-  clearPendingDiagnostic(textDocumentUri);
+const setPendingDiagnostic = (textDocumentUri: string, content: string) => {
   pendingDocumentDiagnostics.set(
     textDocumentUri,
     setTimeout(() => {
@@ -78,24 +72,32 @@ export const diagnoseDocument = (textDocumentUri: DocumentUri) => {
   );
 };
 
+export const diagnoseDocument = (textDocumentUri: DocumentUri) => {
+  const content = documents.get(textDocumentUri);
+  if (!content) {
+    return null;
+  }
+  clearPendingDiagnostic(textDocumentUri);
+  setPendingDiagnostic(textDocumentUri, content);
+};
+
+const addDiagnosticErrorListener = (parser: jsoniqParser) => {
+  const items: Diagnostic[] = [];
+  const diagnosticErrorListener = new DiagnosticErrorListener(items);
+  parser.addErrorListener(diagnosticErrorListener);
+  return diagnosticErrorListener;
+};
+
+const parseContent = (parser: jsoniqParser) => {
+  parser.moduleAndThisIsIt();
+};
+
 export const validateContent = (
   content: string
 ): FullDocumentDiagnosticReport => {
-  const items: Diagnostic[] = [];
-  const inputStream = CharStreams.fromString(content);
-  const lexer = new jsoniqLexer(inputStream);
-  const tokenStream = new CommonTokenStream(lexer);
-  const parser = new jsoniqParser(tokenStream);
-
-  // Override error listener
-  parser.removeErrorListeners();
-
-  // Add our listener
-  const diagnosticErrorListener = new DiagnosticErrorListener(items);
-  parser.addErrorListener(diagnosticErrorListener);
-
-  // Parse
-  parser.moduleAndThisIsIt();
+  const parser = initializeJSONiqParserWithoutErrorListener(content);
+  const diagnosticErrorListener = addDiagnosticErrorListener(parser);
+  parseContent(parser);
 
   return {
     kind: "full",

@@ -1,9 +1,7 @@
 import { connection } from "../../server.js";
-import { documents } from "../../documents.js";
-import { CharStreams, CommonTokenStream } from "antlr4ts";
-import { jsoniqLexer } from "../../grammar/jsoniqLexer.js";
-import { jsoniqParser } from "../../grammar/jsoniqParser.js";
+import { documents } from "../../types/documents.js";
 import { DiagnosticErrorListener } from "./errorListener.js";
+import { initializeJSONiqParserWithoutErrorListener } from "../../parser-utils/parser.js";
 var DiagnosticSeverity;
 (function (DiagnosticSeverity) {
     DiagnosticSeverity.Error = 1;
@@ -28,12 +26,7 @@ export const documentsDiagnostics = new Map();
 //   documentsDiagnostics.set(content, diagnostic);
 //   return diagnostic;
 // };
-export const diagnoseDocument = (textDocumentUri) => {
-    const content = documents.get(textDocumentUri);
-    if (!content) {
-        return null;
-    }
-    clearPendingDiagnostic(textDocumentUri);
+const setPendingDiagnostic = (textDocumentUri, content) => {
     pendingDocumentDiagnostics.set(textDocumentUri, setTimeout(() => {
         // Remove self after delay expires
         pendingDocumentDiagnostics.delete(textDocumentUri);
@@ -45,19 +38,27 @@ export const diagnoseDocument = (textDocumentUri) => {
         });
     }, DEFAULT_DELAY));
 };
-export const validateContent = (content) => {
+export const diagnoseDocument = (textDocumentUri) => {
+    const content = documents.get(textDocumentUri);
+    if (!content) {
+        return null;
+    }
+    clearPendingDiagnostic(textDocumentUri);
+    setPendingDiagnostic(textDocumentUri, content);
+};
+const addDiagnosticErrorListener = (parser) => {
     const items = [];
-    const inputStream = CharStreams.fromString(content);
-    const lexer = new jsoniqLexer(inputStream);
-    const tokenStream = new CommonTokenStream(lexer);
-    const parser = new jsoniqParser(tokenStream);
-    // Override error listener
-    parser.removeErrorListeners();
-    // Add our listener
     const diagnosticErrorListener = new DiagnosticErrorListener(items);
     parser.addErrorListener(diagnosticErrorListener);
-    // Parse
+    return diagnosticErrorListener;
+};
+const parseContent = (parser) => {
     parser.moduleAndThisIsIt();
+};
+export const validateContent = (content) => {
+    const parser = initializeJSONiqParserWithoutErrorListener(content);
+    const diagnosticErrorListener = addDiagnosticErrorListener(parser);
+    parseContent(parser);
     return {
         kind: "full",
         items: diagnosticErrorListener.items,

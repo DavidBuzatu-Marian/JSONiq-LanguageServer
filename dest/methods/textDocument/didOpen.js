@@ -1,4 +1,4 @@
-import { documents } from "../../documents.js";
+import { documents } from "../../types/documents.js";
 import { diagnoseDocument } from "../diagnostics/diagnostic.js";
 export const didOpen = (message) => {
     const params = message.params;

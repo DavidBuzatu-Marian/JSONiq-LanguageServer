@@ -3,8 +3,9 @@ import { ChildProcess } from "child_process";
 import { spawn } from "child_process";
 
 export class LanguageServerWrapper {
-  public process: ChildProcess | undefined;
   private requestId: number = 0;
+  private error: (value: object) => void;
+  public process: ChildProcess | undefined;
   public requestHandlers: Map<number, (value: object) => void> = new Map();
   public diagnosticHandlers: Map<string, (value: object) => void> = new Map();
 
@@ -12,7 +13,9 @@ export class LanguageServerWrapper {
     public readonly command: string,
     public readonly args: string[],
     public verbose: boolean = false
-  ) {}
+  ) {
+    this.error = () => {};
+  }
 
   start() {
     this.process = spawn(this.command, this.args);
@@ -45,7 +48,6 @@ export class LanguageServerWrapper {
     }
 
     let buffer = "";
-
     this.process.stdout.on("data", (chunk) => {
       buffer += chunk;
 
@@ -65,7 +67,6 @@ export class LanguageServerWrapper {
           messageStart + contentLength
         );
         const message = JSON.parse(rawMessage);
-
         if (message.id !== undefined && this.requestHandlers.has(message.id)) {
           if (this.verbose) {
             console.log(`Resolving request ${message.id} with ${rawMessage}`);
@@ -77,12 +78,13 @@ export class LanguageServerWrapper {
             message.params.diagnostics
           );
           this.diagnosticHandlers.delete(message.params.uri);
+        } else if (message.result.error) {
+          this.error?.(message.result.error);
         } else {
           if (this.verbose) {
             console.warn(JSON.stringify(message, null, 2));
           }
         }
-
         // Remove the processed message from the buffer
         buffer = buffer.slice(messageStart + contentLength);
       }
@@ -142,6 +144,12 @@ export class LanguageServerWrapper {
 
     return new Promise((resolve) => {
       this.diagnosticHandlers.set(documentUri, resolve);
+    });
+  }
+
+  public getError() {
+    return new Promise((resolve) => {
+      this.error = resolve;
     });
   }
 }

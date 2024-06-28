@@ -3,7 +3,7 @@ const log = fs.createWriteStream("/tmp/jsoniq-lsp.log");
 export default {
     write: (message) => {
         // Only write if verbosity enabled
-        if (!!process.env.VERBOSE) {
+        if (true) {
             if (typeof message === "object") {
                 log.write(JSON.stringify(message));
             }

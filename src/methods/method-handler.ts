@@ -66,8 +66,10 @@ export class MethodHandler {
           message: `Attempting to call method: ${jsonMessage.method} after shutdown! This is an illegal operation. Exit-only is allowed`,
         },
       };
-    } else {
+    } else if (this.invokedMethod) {
       return this.invokedMethod!(jsonMessage);
+    } else {
+      return undefined;
     }
   }
 

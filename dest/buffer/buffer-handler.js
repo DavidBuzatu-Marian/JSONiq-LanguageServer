@@ -27,7 +27,9 @@ export class BufferHandler {
             }
         }
         catch (err) {
-            log.write(`Caught error while processing buffer content. Error: ${err}`);
+            if (!(err instanceof LengthNotFoundInContentLengthHeaderError)) {
+                log.write(`Caught error while processing buffer content. Error: ${err}. Buffer: ${this.buffer}.`);
+            }
         }
     }
     getContentLength() {

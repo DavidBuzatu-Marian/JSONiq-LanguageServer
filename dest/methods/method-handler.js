@@ -50,8 +50,11 @@ export class MethodHandler {
                 },
             };
         }
-        else {
+        else if (this.invokedMethod) {
             return this.invokedMethod(jsonMessage);
+        }
+        else {
+            return undefined;
         }
     }
     respond(id, result) {

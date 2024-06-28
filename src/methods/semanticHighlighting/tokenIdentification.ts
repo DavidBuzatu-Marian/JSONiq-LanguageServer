@@ -257,13 +257,6 @@ export class TokensParser {
             typeNumber: tokenModifiers["readonly"],
           },
         ]);
-      } else if (builtInFunctionsSet.has(currTokenText)) {
-        this.storeTokenWithModifier(parsedTokens, currToken, [
-          { typeNumber: tokenTypes["function"] },
-          {
-            typeNumber: tokenModifiers["defaultLibrary"],
-          },
-        ]);
       } else {
         this.storeTokenWithModifier(parsedTokens, currToken, [
           { typeNumber: tokenTypes["property"] },

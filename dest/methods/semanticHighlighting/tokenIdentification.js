@@ -224,14 +224,6 @@ export class TokensParser {
                     },
                 ]);
             }
-            else if (builtInFunctionsSet.has(currTokenText)) {
-                this.storeTokenWithModifier(parsedTokens, currToken, [
-                    { typeNumber: tokenTypes["function"] },
-                    {
-                        typeNumber: tokenModifiers["defaultLibrary"],
-                    },
-                ]);
-            }
             else {
                 this.storeTokenWithModifier(parsedTokens, currToken, [
                     { typeNumber: tokenTypes["property"] },

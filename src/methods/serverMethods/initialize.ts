@@ -1,5 +1,5 @@
-import { RequestMessage } from "../server.js";
-import { tokenLegend } from "./semanticHighlighting/tokenLegend.js";
+import { RequestMessage } from "../../types.js";
+import { tokenLegend } from "../semanticHighlighting/tokenLegend.js";
 type ServerCapabilities = Record<string, unknown>;
 
 interface InitializeResult {

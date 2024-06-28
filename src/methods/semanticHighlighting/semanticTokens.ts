@@ -1,5 +1,5 @@
 import { TextDocumentIdentifier, documents } from "../../types/documents.js";
-import { RequestMessage } from "../../server.js";
+import { RequestMessage } from "../../types/types.js";
 import { TokensParser } from "./tokenIdentification.js";
 import { CharStreams } from "antlr4ts";
 import { jsoniqLexer } from "../../grammar/jsoniqLexer.js";
@@ -57,16 +57,10 @@ export const semanticTokens = (message: RequestMessage): SemanticTokens => {
   return getSemanticTokensFromContent(content);
 };
 
-export const rangeSemanticTokens = (
-  message: RequestMessage
-): SemanticTokens => {
-  const params = message.params as RangeSemanticTokensParams;
-  const content = documents.get(params.textDocument.uri);
-  if (!content) {
-    return {
-      data: [],
-    };
-  }
+const getContentFromRange = (
+  content: string,
+  params: RangeSemanticTokensParams
+) => {
   const contentLines = content.split(/\r?\n/);
   const startPosition = params.range.start;
   const endPosition = params.range.end;
@@ -78,6 +72,21 @@ export const rangeSemanticTokens = (
     ++lineCnt;
   }
   contentForTokens += contentLines[lineCnt].slice(0, endPosition.character);
+  return contentForTokens;
+};
+
+export const rangeSemanticTokens = (
+  message: RequestMessage
+): SemanticTokens => {
+  const params = message.params as RangeSemanticTokensParams;
+  const startPosition = params.range.start;
+  const content = documents.get(params.textDocument.uri);
+  if (!content) {
+    return {
+      data: [],
+    };
+  }
+  const contentForTokens = getContentFromRange(content, params);
   return getSemanticTokensFromContent(contentForTokens, startPosition);
 };
 

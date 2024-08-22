@@ -160,6 +160,7 @@ export class TokensParser {
     getSemanticTokens() {
         let parsedTokens = [];
         let tokenCounter = 0;
+        log.write("Starting semantic highlighting");
         while (tokenCounter < this._tokens.length) {
             let tokenText = this._tokens[tokenCounter].text;
             if (tokenText === undefined) {
@@ -194,6 +195,7 @@ export class TokensParser {
                 ++tokenCounter;
             }
         }
+        log.write("Ending semantic highlighting");
         return parsedTokens;
     }
     parseAttributes(parsedTokens, lexerTokens, tokenCounter) {
@@ -287,9 +289,6 @@ export class TokensParser {
             { typeNumber: tokenTypes["variable"] },
             { typeNumber: tokenModifiers["readonly"] },
         ]);
-        if (currentCounter + 1 === lexerTokens.length) {
-            return currentCounter + 1;
-        }
         return this.parseAttributes(parsedTokens, lexerTokens, currentCounter);
     }
     parseAndStoreToken(parsedTokens, token) {

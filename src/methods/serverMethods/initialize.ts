@@ -16,7 +16,8 @@ export const initialize = (message: RequestMessage): InitializeResult => {
       textDocumentSync: 1,
       semanticTokensProvider: {
         legend: tokenLegend,
-        range: true,
+        // Disabled for bug fixing
+        // range: true,
         full: { delta: false },
       },
       completionProvider: {},

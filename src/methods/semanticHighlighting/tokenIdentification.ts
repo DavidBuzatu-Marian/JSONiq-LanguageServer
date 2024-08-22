@@ -340,9 +340,6 @@ export class TokensParser {
       { typeNumber: tokenTypes["variable"] },
       { typeNumber: tokenModifiers["readonly"] },
     ]);
-    if (currentCounter + 1 === lexerTokens.length) {
-      return currentCounter + 1;
-    }
     return this.parseAttributes(parsedTokens, lexerTokens, currentCounter);
   }
 

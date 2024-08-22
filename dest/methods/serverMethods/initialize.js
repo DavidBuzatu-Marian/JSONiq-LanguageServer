@@ -5,7 +5,7 @@ export const initialize = (message) => {
             textDocumentSync: 1,
             semanticTokensProvider: {
                 legend: tokenLegend,
-                range: true,
+                // range: true,
                 full: { delta: false },
             },
             completionProvider: {},

@@ -85,6 +85,7 @@ const keywordSet = new Set([
   "or",
   "not",
   "$$",
+  "count",
 ]);
 
 const staticModifierSet = new Set([
@@ -103,7 +104,6 @@ const localStorageSet = new Set(["function", "let", "variable"]);
 const operatorSet = new Set([":=", "=", "+", "-", "*", "/", ":", "."]);
 
 const builtInFunctionsSet = new Set([
-  "count",
   "position",
   "json-file",
   "concat",
